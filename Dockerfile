@@ -30,5 +30,6 @@ ENV MODEL_NAME="llama-3.3-70b-versatile"
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "from env import CustomerSupportTriageEnv; env = CustomerSupportTriageEnv(); env.reset(); print('OK')"
 
-# Run the inference script
-CMD ["python", "inference.py"]
+# Start the OpenEnv environment API server
+EXPOSE 7860
+CMD ["openenv", "serve", ".", "--host", "0.0.0.0", "--port", "7860"]
