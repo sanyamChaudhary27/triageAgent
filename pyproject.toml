@@ -32,12 +32,16 @@ dependencies = [
     "uvicorn>=0.24.0",
 ]
 
+[project.scripts]
+server = "server.app:main"
+
 [project.urls]
 Homepage = "https://huggingface.co/spaces/sanyamChaudhary27/customer-support-triage"
 Repository = "https://github.com/sanyamChaudhary27/triageAgent"
 
 [tool.setuptools]
-py-modules = ["env", "inference", "app"]
+packages = ["server"]
+py-modules = ["env", "inference"]
 
 [tool.openenv]
 name = "customer-support-triage"

@@ -9,15 +9,16 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy project files
-COPY requirements.txt .
+COPY pyproject.toml .
+COPY uv.lock .
 COPY env.py .
 COPY inference.py .
-COPY app.py .
+COPY server/ server/
 COPY openenv.yaml .
 COPY README.md .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies and the project
+RUN pip install --no-cache-dir .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
@@ -31,6 +32,6 @@ ENV MODEL_NAME="llama-3.3-70b-versatile"
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "from env import CustomerSupportTriageEnv; env = CustomerSupportTriageEnv(); env.reset(); print('OK')"
 
-# Start the FastAPI environment server via uvicorn
+# Start the environment server via the installed script
 EXPOSE 7860
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["server"]
