@@ -1,0 +1,122 @@
+name: customer-support-triage
+version: "1.0.0"
+description: |
+  A real-world customer support ticket triage and routing environment.
+  Agents learn to classify ticket severity, assign to appropriate teams,
+  and generate contextual responses while managing SLA constraints.
+  
+  Tasks range from simple multi-class classification (easy) to complex
+  prioritization under capacity constraints (hard).
+
+author: "Sanyam Chaudhary"
+organization: "Sanyam Chaudhary"
+homepage: "https://huggingface.co/spaces/sanyamChaudhary27/customer-support-triage"
+license: "MIT"
+
+tasks:
+  - id: "ticket-classification-easy"
+    name: "Ticket Classification (Easy)"
+    description: "Classify ticket severity into 5 categories: critical, high, medium, low, info"
+    difficulty: "easy"
+    
+  - id: "ticket-routing-medium"
+    name: "Ticket Routing & Prioritization (Medium)"
+    description: "Route tickets to teams and prioritize based on SLA + capacity"
+    difficulty: "medium"
+    
+  - id: "ticket-handling-hard"
+    name: "Complex Ticket Handling (Hard)"
+    description: "Handle multi-part tickets with conversation history and dynamic context"
+    difficulty: "hard"
+
+observation_space:
+  type: "object"
+  properties:
+    ticket_id:
+      type: "string"
+      description: "Unique ticket identifier"
+    customer_id:
+      type: "string"
+      description: "Customer identifier"
+    subject:
+      type: "string"
+      description: "Ticket subject line"
+    body:
+      type: "string"
+      description: "Full ticket body/message"
+    priority_hint:
+      type: "string"
+      enum: ["none", "urgent", "high", "normal", "low"]
+      description: "Optional customer-provided priority hint"
+    customer_sentiment:
+      type: "number"
+      minimum: 0.0
+      maximum: 1.0
+      description: "Sentiment score of ticket message (0=angry, 1=happy)"
+    conversation_history:
+      type: "array"
+      description: "Previous messages in this ticket thread"
+      items:
+        type: "object"
+        properties:
+          role:
+            type: "string"
+            enum: ["customer", "agent"]
+          message:
+            type: "string"
+          timestamp:
+            type: "string"
+    metadata:
+      type: "object"
+      properties:
+        created_at:
+          type: "string"
+        customer_tier:
+          type: "string"
+          enum: ["free", "professional", "enterprise"]
+        previous_tickets_count:
+          type: "integer"
+        is_repeat_customer:
+          type: "boolean"
+
+action_space:
+  type: "object"
+  properties:
+    action_type:
+      type: "string"
+      enum: ["classify", "assign", "respond", "escalate", "close"]
+      description: "Type of action to take"
+    severity:
+      type: "string"
+      enum: ["critical", "high", "medium", "low", "info"]
+      description: "Severity classification (required for classify action)"
+    assigned_team:
+      type: "string"
+      enum: ["billing", "technical", "product", "sales", "general"]
+      description: "Team assignment (required for assign action)"
+    response_text:
+      type: "string"
+      description: "Auto-generated response (required for respond action)"
+    reason:
+      type: "string"
+      description: "Reason for escalation (required for escalate action)"
+
+reward_schema:
+  type: "number"
+  minimum: -1.0
+  maximum: 1.0
+  description: "Step reward signal: +correct action, -SLA violation, +sentiment improvement"
+
+episode_length:
+  min: 3
+  max: 10
+  description: "Minimum and maximum steps per episode"
+
+environment_class: "CustomerSupportTriageEnv"
+entry_point: "env:CustomerSupportTriageEnv"
+
+constraints:
+  max_vcpu: 2
+  max_memory_gb: 8
+  inference_time_limit_seconds: 1200
+  episode_timeout_seconds: 60
