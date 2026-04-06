@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 COPY env.py .
 COPY inference.py .
+COPY app.py .
 COPY openenv.yaml .
 COPY README.md .
 
@@ -30,6 +31,6 @@ ENV MODEL_NAME="llama-3.3-70b-versatile"
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "from env import CustomerSupportTriageEnv; env = CustomerSupportTriageEnv(); env.reset(); print('OK')"
 
-# Start the OpenEnv environment API server
+# Start the FastAPI environment server via uvicorn
 EXPOSE 7860
-CMD openenv serve . --host 0.0.0.0 --port 7860
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
