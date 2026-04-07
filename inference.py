@@ -156,6 +156,8 @@ def run_episode(env: CustomerSupportTriageEnv, client: OpenAI) -> float:
     logger.info(f"Started episode for task: {env.task_id}")
     logger.info(f"Ticket: {observation.subject}")
     
+    print(f"[START] task={env.task_id}", flush=True)
+    
     # Run episode
     for step in range(MAX_STEPS_PER_EPISODE):
         # Build prompt
@@ -191,6 +193,7 @@ def run_episode(env: CustomerSupportTriageEnv, client: OpenAI) -> float:
         observation = step_result.observation
         
         logger.info(f"  Reward: {step_result.reward.value:+.2f}")
+        print(f"[STEP] step={step + 1} reward={step_result.reward.value}", flush=True)
         
         if step_result.done:
             logger.info("Episode completed (done=True)")
@@ -199,6 +202,8 @@ def run_episode(env: CustomerSupportTriageEnv, client: OpenAI) -> float:
     # Grade the episode
     episode_score = grade_episode(env.task_id, episode_actions, observation)
     logger.info(f"Episode score: {episode_score:.3f}")
+    
+    print(f"[END] task={env.task_id} score={episode_score} steps={len(episode_actions)}", flush=True)
     
     return episode_score
 
