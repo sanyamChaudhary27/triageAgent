@@ -11,6 +11,9 @@ from typing import List, Tuple
 from enum import Enum
 
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from env import (
     CustomerSupportTriageEnv,
