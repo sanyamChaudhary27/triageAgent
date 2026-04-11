@@ -106,8 +106,8 @@ action_space:
 
 reward_schema:
   type: "number"
-  minimum: -1.0
-  maximum: 1.0
+  minimum: -0.99
+  maximum: 0.99
   description: "Step reward signal: +correct action, -SLA violation, +sentiment improvement"
 
 episode_length:

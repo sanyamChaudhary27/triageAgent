@@ -110,7 +110,7 @@ class Action(BaseModel):
 class Reward(BaseModel):
     """OpenEnv Reward model - composite score"""
     
-    value: float = Field(..., ge=-1.0, le=1.0, description="Step reward in [-1, 1]")
+    value: float = Field(..., ge=-0.99, le=0.99, description="Step reward in (-1, 1)")
     correct_action: bool = Field(default=False, description="Was action correct?")
     sla_violated: bool = Field(default=False, description="Did action violate SLA?")
     efficiency: float = Field(default=0.0, ge=0.0, le=1.0, description="Action efficiency score")
@@ -616,7 +616,7 @@ class CustomerSupportTriageEnv:
             base_reward -= 0.1
         
         return Reward(
-            value=max(-1.0, min(1.0, base_reward)),
+            value=max(-0.99, min(0.99, base_reward)),
             correct_action=correct,
             sla_violated=sla_violated,
             efficiency=1.0 / (1.0 + self.step_count),
