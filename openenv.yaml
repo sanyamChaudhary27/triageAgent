@@ -18,16 +18,19 @@ tasks:
     name: "Ticket Classification (Easy)"
     description: "Classify ticket severity into 5 categories: critical, high, medium, low, info"
     difficulty: "easy"
+    grader: "env:grade_episode"
     
   - id: "ticket-routing-medium"
     name: "Ticket Routing & Prioritization (Medium)"
     description: "Route tickets to teams and prioritize based on SLA + capacity"
     difficulty: "medium"
+    grader: "env:grade_episode"
     
   - id: "ticket-handling-hard"
     name: "Complex Ticket Handling (Hard)"
     description: "Handle multi-part tickets with conversation history and dynamic context"
     difficulty: "hard"
+    grader: "env:grade_episode"
 
 observation_space:
   type: "object"
