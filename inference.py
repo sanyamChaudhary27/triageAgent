@@ -180,7 +180,7 @@ def run_episode(env: CustomerSupportTriageEnv, client: OpenAI) -> float:
             response_text = completion.choices[0].message.content
         except Exception as e:
             logger.error(f"API error: {e}")
-            return 0.0
+            return 0.01
         
         # Parse action
         action = parse_action(response_text)
@@ -204,6 +204,7 @@ def run_episode(env: CustomerSupportTriageEnv, client: OpenAI) -> float:
     
     # Grade the episode
     episode_score = grade_episode(env.task_id, episode_actions, observation)
+    episode_score = max(0.01, min(episode_score, 0.99))
     logger.info(f"Episode score: {episode_score:.3f}")
     
     print(f"[END] task={env.task_id} score={episode_score} steps={len(episode_actions)}", flush=True)
@@ -241,7 +242,8 @@ def main():
             logger.info(f"Score: {score:.3f}\n")
         
         # Compute statistics
-        avg_score = sum(episode_scores) / len(episode_scores) if episode_scores else 0.0
+        avg_score = sum(episode_scores) / len(episode_scores) if episode_scores else 0.01
+        avg_score = max(0.01, min(avg_score, 0.99))
         max_score = max(episode_scores) if episode_scores else 0.0
         min_score = min(episode_scores) if episode_scores else 0.0
         
@@ -262,7 +264,8 @@ def main():
     logger.info("BASELINE RESULTS SUMMARY")
     logger.info(f"{'='*80}")
     
-    overall_avg = sum(r["average"] for r in results.values()) / len(results)
+    overall_avg = sum(r["average"] for r in results.values()) / len(results) if results else 0.01
+    overall_avg = max(0.01, min(overall_avg, 0.99))
     
     for task_id, task_results in results.items():
         logger.info(f"{task_id}:  {task_results['average']:.3f}")
