@@ -569,51 +569,51 @@ class CustomerSupportTriageEnv:
         )
         
         if not ticket_data:
-            return Reward(value=0.0)
+            return Reward(value=0.01)
         
         # Reward correct actions
         if action.action_type == ActionType.CLASSIFY:
             if action.severity == ticket_data["true_severity"]:
-                base_reward = 0.3
+                base_reward = 0.5
                 correct = True
             else:
-                base_reward = -0.1
+                base_reward = 0.1
         
         elif action.action_type == ActionType.ASSIGN:
             if action.assigned_team == ticket_data["true_team"]:
-                base_reward = 0.3
+                base_reward = 0.5
                 correct = True
             else:
-                base_reward = -0.15
+                base_reward = 0.05
         
         elif action.action_type == ActionType.RESPOND:
             # Reward thoughtful responses
             if action.response_text and len(action.response_text) > 30:
-                base_reward = 0.2
+                base_reward = 0.4
                 correct = True
             else:
-                base_reward = -0.1
+                base_reward = 0.1
         
         elif action.action_type == ActionType.ESCALATE:
             # Escalation is good for complex/critical issues
             if ticket_data["true_severity"] in [Severity.CRITICAL, Severity.HIGH]:
-                base_reward = 0.2
+                base_reward = 0.4
                 correct = True
             else:
-                base_reward = -0.05
+                base_reward = 0.05
         
         elif action.action_type == ActionType.CLOSE:
             # Closing is a final action - grade whole episode
             if len(self.episode_actions) >= 2:
-                base_reward = 0.25
+                base_reward = 0.6
                 correct = True
             else:
-                base_reward = -0.2
+                base_reward = 0.1
         
         # SLA compliance bonus/penalty
         sla_violated = self.step_count > (self.current_observation.metadata.sla_minutes / 10)
         if sla_violated:
-            base_reward -= 0.1
+            base_reward = max(0.01, base_reward - 0.2)
         
         return Reward(
             value=max(-0.99, min(0.99, base_reward)),
