@@ -334,12 +334,12 @@ class EasyClassificationGrader(TaskGrader):
         - Correct team assignment: +0.4
         """
         if not actions:
-            return 0.0
+            return 0.01
         
         # Get the true severity/team from our synthetic data
         ticket_data = self._find_ticket_data(observation.subject, observation.body)
         if not ticket_data:
-            return 0.0
+            return 0.01
         
         classify_action = next((a for a in actions if a.action_type == ActionType.CLASSIFY), None)
         assign_action = next((a for a in actions if a.action_type == ActionType.ASSIGN), None)
@@ -352,7 +352,7 @@ class EasyClassificationGrader(TaskGrader):
         if assign_action and assign_action.assigned_team == ticket_data["true_team"]:
             score += 0.4
         
-        return min(score, 1.0)
+        return max(0.01, min(score, 0.99))
     
     @staticmethod
     def _find_ticket_data(subject: str, body: str) -> Optional[Dict]:
@@ -373,11 +373,11 @@ class MediumRoutingGrader(TaskGrader):
         - Efficient (no unnecessary actions): +0.2
         """
         if not actions:
-            return 0.0
+            return 0.01
         
         ticket_data = self._find_ticket_data(observation.subject, observation.body)
         if not ticket_data:
-            return 0.0
+            return 0.01
         
         assign_action = next((a for a in actions if a.action_type == ActionType.ASSIGN), None)
         
@@ -395,7 +395,7 @@ class MediumRoutingGrader(TaskGrader):
         if len(actions) <= 3:
             score += 0.2
         
-        return min(score, 1.0)
+        return max(0.01, min(score, 0.99))
     
     @staticmethod
     def _find_ticket_data(subject: str, body: str) -> Optional[Dict]:
@@ -416,7 +416,7 @@ class HardComplexGrader(TaskGrader):
         - Provides thoughtful response: +0.3
         """
         if not actions:
-            return 0.0
+            return 0.01
         
         score = 0.0
         
@@ -437,7 +437,7 @@ class HardComplexGrader(TaskGrader):
         if respond_action and respond_action.response_text and len(respond_action.response_text) > 20:
             score += 0.3
         
-        return min(score, 1.0)
+        return max(0.01, min(score, 0.99))
 
 
 # ============================================================================
