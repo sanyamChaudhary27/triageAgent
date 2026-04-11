@@ -7,6 +7,7 @@ sdk: docker
 app_port: 7860
 pinned: false
 ---
+
 # Customer Support Ticket Triage Environment
 
 ## 🎯 Overview
@@ -16,6 +17,7 @@ A **real-world OpenEnv environment** for training and evaluating AI agents on cu
 This environment models a task that **millions of support teams worldwide perform daily**, making it immediately valuable for agent evaluation and training.
 
 ### Why This Matters
+
 - **Real-world utility**: Companies spend billions annually on support operations
 - **Agent challenge**: Requires multi-step reasoning, contextual understanding, and constraint satisfaction
 - **Reward shaping**: Rich signal over trajectories, not just binary success/failure
@@ -28,21 +30,24 @@ This environment models a task that **millions of support teams worldwide perfor
 ### Task Definitions
 
 #### Task 1: Ticket Classification (Easy) ⭐
+
 **Objective**: Correctly classify ticket severity and assign to team.
 
-| Property | Value |
-|----------|-------|
-| **Difficulty** | Easy |
-| **Expected Baseline** | ~65-75% |
-| **Evaluation** | Classification accuracy |
-| **Episode Length** | 2-4 steps |
+| Property              | Value                   |
+| --------------------- | ----------------------- |
+| **Difficulty**        | Easy                    |
+| **Expected Baseline** | ~65-75%                 |
+| **Evaluation**        | Classification accuracy |
+| **Episode Length**    | 2-4 steps               |
 
-**Success Criteria**: 
+**Success Criteria**:
+
 - Correctly classify severity (5 classes: critical, high, medium, low, info)
 - Assign to correct team (5 teams: billing, technical, product, sales, general)
 - Respond within SLA window
 
 **Example Ticket**:
+
 ```
 Subject: App not responding on mobile
 Body: The app crashes every time I try to upload a file. Error: RuntimeException
@@ -52,22 +57,25 @@ Body: The app crashes every time I try to upload a file. Error: RuntimeException
 ---
 
 #### Task 2: Ticket Routing & Prioritization (Medium) ⭐⭐
+
 **Objective**: Route tickets intelligently under resource constraints.
 
-| Property | Value |
-|----------|-------|
-| **Difficulty** | Medium |
-| **Expected Baseline** | ~45-60% |
-| **Evaluation** | Routing accuracy + SLA compliance |
-| **Episode Length** | 3-6 steps |
+| Property              | Value                             |
+| --------------------- | --------------------------------- |
+| **Difficulty**        | Medium                            |
+| **Expected Baseline** | ~45-60%                           |
+| **Evaluation**        | Routing accuracy + SLA compliance |
+| **Episode Length**    | 3-6 steps                         |
 
 **Success Criteria**:
+
 - Route to correct team
 - Respect SLA response time (varies: CRITICAL=15min, HIGH=60min, etc.)
 - Prioritize efficiently
 - Avoid unnecessary actions
 
 **Complexity Factors**:
+
 - Multiple ticket features (tier, history, sentiment)
 - SLA windows create time-based constraints
 - Repeat customers get priority
@@ -76,25 +84,28 @@ Body: The app crashes every time I try to upload a file. Error: RuntimeException
 ---
 
 #### Task 3: Complex Ticket Handling (Hard) ⭐⭐⭐
+
 **Objective**: Handle multi-part tickets requiring escalation and context awareness.
 
-| Property | Value |
-|----------|-------|
-| **Difficulty** | Hard |
-| **Expected Baseline** | ~25-40% |
-| **Evaluation** | Full episode grading |
-| **Episode Length** | 4-10 steps |
+| Property              | Value                |
+| --------------------- | -------------------- |
+| **Difficulty**        | Hard                 |
+| **Expected Baseline** | ~25-40%              |
+| **Evaluation**        | Full episode grading |
+| **Episode Length**    | 4-10 steps           |
 
 **Success Criteria**:
+
 - Identify critical issues first
 - Escalate appropriately when needed
 - Provide contextual, empathetic responses
 - Manage conversation history
 
 **Example Ticket**:
+
 ```
 Subject: Multiple issues: Performance + API + billing
-Body: 1) Dashboard is slow. 2) API rate limit too low. 
+Body: 1) Dashboard is slow. 2) API rate limit too low.
       3) Billing shows duplicate charge. Need all fixed ASAP.
 → Requires: ESCALATE, multiple CLASSIFY actions, thoughtful RESPOND
 ```
@@ -129,24 +140,25 @@ Valid actions (mutually exclusive per step):
 ```python
 class Action(BaseModel):
     action_type: ActionType  # classify | assign | respond | escalate | close
-    
+
     # For CLASSIFY:
     severity: Severity       # critical, high, medium, low, info
-    
+
     # For ASSIGN:
     assigned_team: Team      # billing, technical, product, sales, general
-    
+
     # For RESPOND:
     response_text: str       # Custom response to customer
-    
+
     # For ESCALATE:
     reason: str              # Why escalation is needed
-    
+
     # For CLOSE:
     # (no additional fields)
 ```
 
 **Example Actions**:
+
 ```json
 {"action_type": "classify", "severity": "critical"}
 {"action_type": "assign", "assigned_team": "technical"}
@@ -162,6 +174,7 @@ class Action(BaseModel):
 Episode reward = sum of step rewards
 
 **Step Reward Components**:
+
 - **Correct classification**: +0.3
 - **Correct assignment**: +0.3
 - **Thoughtful response** (>30 chars): +0.2
@@ -171,6 +184,7 @@ Episode reward = sum of step rewards
 - **Team mismatch**: -0.15
 
 **Episode Properties**:
+
 - Rich reward signal (not sparse)
 - Rewards partial progress
 - Penalizes inefficiency
@@ -312,14 +326,15 @@ docker run \
 **Setup**: 2 vCPU, 8GB RAM  
 **Runtime**: ~12 minutes (3 tasks × 3 episodes)
 
-| Task | Episodes | Avg Score | Max | Min |
-|------|----------|-----------|-----|-----|
-| **Easy Classification** | 3 | 0.68 | 0.81 | 0.52 |
-| **Medium Routing** | 3 | 0.54 | 0.67 | 0.41 |
-| **Hard Handling** | 3 | 0.35 | 0.48 | 0.19 |
-| **Overall Average** | 9 | **0.52** | — | — |
+| Task                    | Episodes | Avg Score | Max  | Min  |
+| ----------------------- | -------- | --------- | ---- | ---- |
+| **Easy Classification** | 3        | 0.68      | 0.81 | 0.52 |
+| **Medium Routing**      | 3        | 0.54      | 0.67 | 0.41 |
+| **Hard Handling**       | 3        | 0.35      | 0.48 | 0.19 |
+| **Overall Average**     | 9        | **0.52**  | —    | —    |
 
 ### Interpretation
+
 - **Easy task**: Model masters basic classification
 - **Medium task**: More challenging with constraints and routing logic
 - **Hard task**: Multi-step reasoning with escalation needed
@@ -354,6 +369,7 @@ This environment fully implements the OpenEnv specification:
 - ✅ **Inference**: Baseline script using OpenAI client
 
 Run validation:
+
 ```bash
 pip install openenv
 openenv validate .
@@ -379,10 +395,10 @@ Possible enhancements for future iterations:
 If you use this environment in research, please cite:
 
 ```bibtex
-@software{support_triage_2024,
+@software{support_triage_2026,
   title={Customer Support Ticket Triage Environment},
   author={Sanyam Chaudhary},
-  year={2024},
+  year={2026},
   url={https://huggingface.co/spaces/sanyamChaudhary27/customer-support-triage}
 }
 ```
@@ -398,6 +414,7 @@ MIT License - See LICENSE file
 ## 🤝 Contributing
 
 Contributions welcome! Submit issues and PRs to improve:
+
 - Task definitions
 - Reward shaping
 - Synthetic data diversity
@@ -423,5 +440,3 @@ A: Easily extensible. Add new task definitions to `openenv.yaml` and graders in 
 A: Absolutely! It's designed for customization. Maintain OpenEnv spec compliance.
 
 ---
-
-**Good luck with the competition! 🚀**
