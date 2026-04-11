@@ -1,5 +1,6 @@
 name: customer-support-triage
-version: "1.0.0"
+version: "1.1.0"
+display_name: "Customer Support Triage System"
 description: |
   A real-world customer support ticket triage and routing environment.
   Agents learn to classify ticket severity, assign to appropriate teams,
@@ -9,6 +10,36 @@ author: "Sanyam Chaudhary"
 organization: "Sanyam Chaudhary"
 homepage: "https://huggingface.co/spaces/sanyamChaudhary27/customer-support-triage"
 license: "MIT"
+entry_point: "server.app:app"
+
+infrastructure:
+  framework: FastAPI
+  port: 7860
+  health_check: GET /health
+  docker: true
+  hf_space: true
+
+endpoints:
+  reset:
+    method: POST
+    path: /reset
+    description: "Start new episode, returns observation + session_id"
+  step:
+    method: POST
+    path: /step
+    description: "Apply action, returns StepResponse"
+  state:
+    method: GET
+    path: /state/{session_id}
+    description: "Return full internal state"
+  health:
+    method: GET
+    path: /health
+    description: "Health check"
+  tasks:
+    method: GET
+    path: /tasks
+    description: "List all available tasks"
 
 tasks:
   - id: "ticket-classification-easy"
@@ -16,18 +47,21 @@ tasks:
     description: "Classify ticket severity into categories."
     difficulty: "easy"
     grader: "env:grade_episode"
+    score_range: [0.0, 1.0]
     
   - id: "ticket-routing-medium"
     name: "Ticket Routing (Medium)"
     description: "Route tickets to teams."
     difficulty: "medium"
     grader: "env:grade_episode"
+    score_range: [0.0, 1.0]
     
   - id: "ticket-handling-hard"
     name: "Complex Ticket Handling (Hard)"
     description: "Handle multi-part tickets."
     difficulty: "hard"
     grader: "env:grade_episode"
+    score_range: [0.0, 1.0]
 
 observation_space:
   type: "object"
@@ -40,10 +74,14 @@ observation_space:
       type: "string"
     customer_sentiment:
       type: "number"
-      minimum: 0.01
-      maximum: 0.99
+      minimum: 0.001
+      maximum: 0.999
     task_id:
       type: "string"
+    step_number:
+      type: "integer"
+    episode_done:
+      type: "boolean"
 
 action_space:
   type: "object"
@@ -62,15 +100,14 @@ action_space:
 
 reward_schema:
   type: "number"
-  minimum: 0.01
-  maximum: 0.99
+  minimum: 0.001
+  maximum: 0.999
 
 episode_length:
   min: 1
   max: 5
 
 environment_class: "CustomerSupportTriageEnv"
-entry_point: "env:CustomerSupportTriageEnv"
 
 constraints:
   max_vcpu: 2

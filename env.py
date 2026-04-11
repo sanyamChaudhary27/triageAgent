@@ -13,12 +13,17 @@ from typing import Optional, List, Any, Dict
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+import math
+
 def clamp_score(score: float) -> float:
-    """Ensure score is strictly between 0 and 1 as per validator requirements."""
+    """Ensure score is strictly between 0 and 1 using sigmoid clamping."""
     try:
         f_score = float(score)
-        # Using 0.1 to 0.9 for absolute safety
-        return max(0.101, min(0.899, f_score))
+        # Sigmoid-based clamping to (0.001, 0.999)
+        # Centers at 0.5, scales to ensure 0 maps to ~0.007 and 1 to ~0.993
+        # Then strictly bounded within (0.001, 0.999)
+        sigmoid = 1 / (1 + math.exp(-6 * (f_score - 0.5)))
+        return max(0.001, min(0.999, sigmoid))
     except (ValueError, TypeError):
         return 0.513
 
