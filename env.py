@@ -344,7 +344,7 @@ class EasyClassificationGrader(TaskGrader):
         classify_action = next((a for a in actions if a.action_type == ActionType.CLASSIFY), None)
         assign_action = next((a for a in actions if a.action_type == ActionType.ASSIGN), None)
         
-        score = 0.0
+        score = 0.01
         
         if classify_action and classify_action.severity == ticket_data["true_severity"]:
             score += 0.6
@@ -381,7 +381,7 @@ class MediumRoutingGrader(TaskGrader):
         
         assign_action = next((a for a in actions if a.action_type == ActionType.ASSIGN), None)
         
-        score = 0.0
+        score = 0.01
         
         # Correct assignment
         if assign_action and assign_action.assigned_team == ticket_data["true_team"]:
@@ -418,7 +418,7 @@ class HardComplexGrader(TaskGrader):
         if not actions:
             return 0.01
         
-        score = 0.0
+        score = 0.01
         
         # Check if first action targets the critical issue
         if "Multiple issues" in observation.subject or "ASAP" in observation.body:
@@ -461,7 +461,7 @@ class CustomerSupportTriageEnv:
         self.step_count = 0
         self.max_steps = 10
         self.grader = self._get_grader()
-        self.episode_reward = 0.0
+        self.episode_reward = 0.01
         
     def reset(self) -> ResetResult:
         """Reset environment and return initial observation"""
@@ -496,7 +496,7 @@ class CustomerSupportTriageEnv:
         
         self.episode_actions = []
         self.step_count = 0
-        self.episode_reward = 0.0
+        self.episode_reward = 0.01
         
         return ResetResult(
             observation=self.current_observation,
@@ -559,7 +559,7 @@ class CustomerSupportTriageEnv:
     def _compute_reward(self, action: Action) -> Reward:
         """Compute step reward based on action"""
         
-        base_reward = 0.0
+        base_reward = 0.01
         correct = False
         
         # Get ground truth for this ticket
